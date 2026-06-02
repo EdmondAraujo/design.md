@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import type { ParsedDesignSystem } from '../parser/spec.js';
+import { SCHEMA_KEYS } from '../parser/spec.js';
 import type {
   ModelSpec,
   ModelResult,
@@ -28,6 +29,8 @@ import { isValidColor, isParseableDimension, isTokenReference, parseDimensionPar
 import { parseCssColor } from './color-parser.js';
 
 const MAX_REFERENCE_DEPTH = 10;
+
+const SCHEMA_KEY_SET: ReadonlySet<string> = new Set(SCHEMA_KEYS);
 
 /**
  * Builds a resolved DesignSystemState from parsed YAML tokens.
@@ -206,6 +209,10 @@ export class ModelHandler implements ModelSpec {
         }
       }
 
+      const unknownKeys = [...input.sourceMap.keys()].filter(
+        key => !SCHEMA_KEY_SET.has(key)
+      );
+
       return {
         designSystem: {
           name: input.name,
@@ -217,6 +224,7 @@ export class ModelHandler implements ModelSpec {
           components,
           symbolTable,
           sections: input.sections,
+          unknownKeys,
         },
         findings,
       };
